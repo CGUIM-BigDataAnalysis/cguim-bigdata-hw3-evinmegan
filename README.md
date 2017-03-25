@@ -1,51 +1,33 @@
 長庚大學 大數據分析方法 作業三
 ================
 
-作業說明 （繳交時請直接刪除這個章節）
--------------------------------------
-
-作業目的：練習初級爬蟲，並將爬蟲結果整理成資料框data.frame
-
-依下列指示，完成網站內文分析：
-
--   爬取指定網站內容
-    -   學號結尾 0,4,8:[Ptt Tech\_Job 版](https://www.ptt.cc/bbs/Tech_Job/index.html)
-    -   學號結尾 1,5,9:[Ptt NBA 版](https://www.ptt.cc/bbs/NBA/index.html)
-    -   學號結尾 2,6:[Ptt LoL 版](https://www.ptt.cc/bbs/LoL/index.html)
-    -   學號結尾 3,7:[Ptt movie 版](https://www.ptt.cc/bbs/movie/index.html)
--   試著爬出**至少100篇**文章（`30pt`）的**標題**、**推文數**與**作者ID**（各`10pt`）
-    -   資料框欄位名稱：
-        -   **標題**：Title
-        -   **推文數**：PushNum
-        -   **作者ID**：Author
-    -   一頁只有20篇，該怎麼辦？
-        -   提示：使用for + rbind()將分批爬取出的資料結合
-        -   範例：dataframeAll&lt;-rbind(dataframe1,dataframe2)
-        -   參考：[6.6 資料組合](http://yijutseng.github.io/DataScienceRBook/manipulation.html#section-6.6)
--   將爬取出的資料輸出至Markdown報告中（`10pt`）
-    -   使用knitr::kable(資料框物件)整理輸出
--   用文字搭配程式碼解釋爬蟲結果
-    -   共爬出幾篇文章標題？（程式碼與文字解釋各`5pt`）
-        -   dim(), nrow(), str()皆可
-    -   哪個作者文章數最多？（程式碼與文字解釋各`5pt`）
-        -   table()
-    -   其他爬蟲結果解釋（`10pt`）
-        -   試著找出有趣的現象，不一定要用程式碼搭配解釋，也可只用文字
-
 網站資料爬取
 ------------
 
 ``` r
-#這是R Code Chunk
 library(rvest) ##第一次使用要先安裝 install.packages("rvest")
 ```
 
     ## Loading required package: xml2
 
 ``` r
-##read_html
-##html_nodes
-##html_text
+PTTlink<-c("https://www.ptt.cc/bbs/movie/index.html",
+           "https://www.ptt.cc/bbs/movie/index5260.html",
+           "https://www.ptt.cc/bbs/movie/index5259.html",
+           "https://www.ptt.cc/bbs/movie/index5258.html",
+           "https://www.ptt.cc/bbs/movie/index5257.html",
+           "https://www.ptt.cc/bbs/movie/index5256.html")
+dataframeAll<-NULL
+DCardCGU_posts<-NULL
+for(l in PTTlink){
+  DCardContent<-read_html(l)
+  post_title <- DCardContent %>% html_nodes(".title") %>% html_text() 
+  post_pushNum <- DCardContent %>% html_nodes(".nrec") %>% html_text() 
+  post_Author <- DCardContent %>% html_nodes(".author") %>% html_text()
+  DCardCGU_posts <- data.frame(title = post_title, PushNum=post_pushNum,
+                               Author=post_Author)
+  dataframeAll = rbind(dataframeAll, DCardCGU_posts)
+}
 ```
 
 爬蟲結果呈現
@@ -53,175 +35,181 @@ library(rvest) ##第一次使用要先安裝 install.packages("rvest")
 
 ``` r
 #這是R Code Chunk
-knitr::kable(iris) ##請將iris取代為上個步驟中產生的爬蟲資料資料框
+#knitr::kable(iris) ##請將iris取代為上個步驟中產生的爬蟲資料資料框
+knitr::kable(dataframeAll[c("title","PushNum","Author")])
 ```
 
-|  Sepal.Length|  Sepal.Width|  Petal.Length|  Petal.Width| Species    |
-|-------------:|------------:|-------------:|------------:|:-----------|
-|           5.1|          3.5|           1.4|          0.2| setosa     |
-|           4.9|          3.0|           1.4|          0.2| setosa     |
-|           4.7|          3.2|           1.3|          0.2| setosa     |
-|           4.6|          3.1|           1.5|          0.2| setosa     |
-|           5.0|          3.6|           1.4|          0.2| setosa     |
-|           5.4|          3.9|           1.7|          0.4| setosa     |
-|           4.6|          3.4|           1.4|          0.3| setosa     |
-|           5.0|          3.4|           1.5|          0.2| setosa     |
-|           4.4|          2.9|           1.4|          0.2| setosa     |
-|           4.9|          3.1|           1.5|          0.1| setosa     |
-|           5.4|          3.7|           1.5|          0.2| setosa     |
-|           4.8|          3.4|           1.6|          0.2| setosa     |
-|           4.8|          3.0|           1.4|          0.1| setosa     |
-|           4.3|          3.0|           1.1|          0.1| setosa     |
-|           5.8|          4.0|           1.2|          0.2| setosa     |
-|           5.7|          4.4|           1.5|          0.4| setosa     |
-|           5.4|          3.9|           1.3|          0.4| setosa     |
-|           5.1|          3.5|           1.4|          0.3| setosa     |
-|           5.7|          3.8|           1.7|          0.3| setosa     |
-|           5.1|          3.8|           1.5|          0.3| setosa     |
-|           5.4|          3.4|           1.7|          0.2| setosa     |
-|           5.1|          3.7|           1.5|          0.4| setosa     |
-|           4.6|          3.6|           1.0|          0.2| setosa     |
-|           5.1|          3.3|           1.7|          0.5| setosa     |
-|           4.8|          3.4|           1.9|          0.2| setosa     |
-|           5.0|          3.0|           1.6|          0.2| setosa     |
-|           5.0|          3.4|           1.6|          0.4| setosa     |
-|           5.2|          3.5|           1.5|          0.2| setosa     |
-|           5.2|          3.4|           1.4|          0.2| setosa     |
-|           4.7|          3.2|           1.6|          0.2| setosa     |
-|           4.8|          3.1|           1.6|          0.2| setosa     |
-|           5.4|          3.4|           1.5|          0.4| setosa     |
-|           5.2|          4.1|           1.5|          0.1| setosa     |
-|           5.5|          4.2|           1.4|          0.2| setosa     |
-|           4.9|          3.1|           1.5|          0.2| setosa     |
-|           5.0|          3.2|           1.2|          0.2| setosa     |
-|           5.5|          3.5|           1.3|          0.2| setosa     |
-|           4.9|          3.6|           1.4|          0.1| setosa     |
-|           4.4|          3.0|           1.3|          0.2| setosa     |
-|           5.1|          3.4|           1.5|          0.2| setosa     |
-|           5.0|          3.5|           1.3|          0.3| setosa     |
-|           4.5|          2.3|           1.3|          0.3| setosa     |
-|           4.4|          3.2|           1.3|          0.2| setosa     |
-|           5.0|          3.5|           1.6|          0.6| setosa     |
-|           5.1|          3.8|           1.9|          0.4| setosa     |
-|           4.8|          3.0|           1.4|          0.3| setosa     |
-|           5.1|          3.8|           1.6|          0.2| setosa     |
-|           4.6|          3.2|           1.4|          0.2| setosa     |
-|           5.3|          3.7|           1.5|          0.2| setosa     |
-|           5.0|          3.3|           1.4|          0.2| setosa     |
-|           7.0|          3.2|           4.7|          1.4| versicolor |
-|           6.4|          3.2|           4.5|          1.5| versicolor |
-|           6.9|          3.1|           4.9|          1.5| versicolor |
-|           5.5|          2.3|           4.0|          1.3| versicolor |
-|           6.5|          2.8|           4.6|          1.5| versicolor |
-|           5.7|          2.8|           4.5|          1.3| versicolor |
-|           6.3|          3.3|           4.7|          1.6| versicolor |
-|           4.9|          2.4|           3.3|          1.0| versicolor |
-|           6.6|          2.9|           4.6|          1.3| versicolor |
-|           5.2|          2.7|           3.9|          1.4| versicolor |
-|           5.0|          2.0|           3.5|          1.0| versicolor |
-|           5.9|          3.0|           4.2|          1.5| versicolor |
-|           6.0|          2.2|           4.0|          1.0| versicolor |
-|           6.1|          2.9|           4.7|          1.4| versicolor |
-|           5.6|          2.9|           3.6|          1.3| versicolor |
-|           6.7|          3.1|           4.4|          1.4| versicolor |
-|           5.6|          3.0|           4.5|          1.5| versicolor |
-|           5.8|          2.7|           4.1|          1.0| versicolor |
-|           6.2|          2.2|           4.5|          1.5| versicolor |
-|           5.6|          2.5|           3.9|          1.1| versicolor |
-|           5.9|          3.2|           4.8|          1.8| versicolor |
-|           6.1|          2.8|           4.0|          1.3| versicolor |
-|           6.3|          2.5|           4.9|          1.5| versicolor |
-|           6.1|          2.8|           4.7|          1.2| versicolor |
-|           6.4|          2.9|           4.3|          1.3| versicolor |
-|           6.6|          3.0|           4.4|          1.4| versicolor |
-|           6.8|          2.8|           4.8|          1.4| versicolor |
-|           6.7|          3.0|           5.0|          1.7| versicolor |
-|           6.0|          2.9|           4.5|          1.5| versicolor |
-|           5.7|          2.6|           3.5|          1.0| versicolor |
-|           5.5|          2.4|           3.8|          1.1| versicolor |
-|           5.5|          2.4|           3.7|          1.0| versicolor |
-|           5.8|          2.7|           3.9|          1.2| versicolor |
-|           6.0|          2.7|           5.1|          1.6| versicolor |
-|           5.4|          3.0|           4.5|          1.5| versicolor |
-|           6.0|          3.4|           4.5|          1.6| versicolor |
-|           6.7|          3.1|           4.7|          1.5| versicolor |
-|           6.3|          2.3|           4.4|          1.3| versicolor |
-|           5.6|          3.0|           4.1|          1.3| versicolor |
-|           5.5|          2.5|           4.0|          1.3| versicolor |
-|           5.5|          2.6|           4.4|          1.2| versicolor |
-|           6.1|          3.0|           4.6|          1.4| versicolor |
-|           5.8|          2.6|           4.0|          1.2| versicolor |
-|           5.0|          2.3|           3.3|          1.0| versicolor |
-|           5.6|          2.7|           4.2|          1.3| versicolor |
-|           5.7|          3.0|           4.2|          1.2| versicolor |
-|           5.7|          2.9|           4.2|          1.3| versicolor |
-|           6.2|          2.9|           4.3|          1.3| versicolor |
-|           5.1|          2.5|           3.0|          1.1| versicolor |
-|           5.7|          2.8|           4.1|          1.3| versicolor |
-|           6.3|          3.3|           6.0|          2.5| virginica  |
-|           5.8|          2.7|           5.1|          1.9| virginica  |
-|           7.1|          3.0|           5.9|          2.1| virginica  |
-|           6.3|          2.9|           5.6|          1.8| virginica  |
-|           6.5|          3.0|           5.8|          2.2| virginica  |
-|           7.6|          3.0|           6.6|          2.1| virginica  |
-|           4.9|          2.5|           4.5|          1.7| virginica  |
-|           7.3|          2.9|           6.3|          1.8| virginica  |
-|           6.7|          2.5|           5.8|          1.8| virginica  |
-|           7.2|          3.6|           6.1|          2.5| virginica  |
-|           6.5|          3.2|           5.1|          2.0| virginica  |
-|           6.4|          2.7|           5.3|          1.9| virginica  |
-|           6.8|          3.0|           5.5|          2.1| virginica  |
-|           5.7|          2.5|           5.0|          2.0| virginica  |
-|           5.8|          2.8|           5.1|          2.4| virginica  |
-|           6.4|          3.2|           5.3|          2.3| virginica  |
-|           6.5|          3.0|           5.5|          1.8| virginica  |
-|           7.7|          3.8|           6.7|          2.2| virginica  |
-|           7.7|          2.6|           6.9|          2.3| virginica  |
-|           6.0|          2.2|           5.0|          1.5| virginica  |
-|           6.9|          3.2|           5.7|          2.3| virginica  |
-|           5.6|          2.8|           4.9|          2.0| virginica  |
-|           7.7|          2.8|           6.7|          2.0| virginica  |
-|           6.3|          2.7|           4.9|          1.8| virginica  |
-|           6.7|          3.3|           5.7|          2.1| virginica  |
-|           7.2|          3.2|           6.0|          1.8| virginica  |
-|           6.2|          2.8|           4.8|          1.8| virginica  |
-|           6.1|          3.0|           4.9|          1.8| virginica  |
-|           6.4|          2.8|           5.6|          2.1| virginica  |
-|           7.2|          3.0|           5.8|          1.6| virginica  |
-|           7.4|          2.8|           6.1|          1.9| virginica  |
-|           7.9|          3.8|           6.4|          2.0| virginica  |
-|           6.4|          2.8|           5.6|          2.2| virginica  |
-|           6.3|          2.8|           5.1|          1.5| virginica  |
-|           6.1|          2.6|           5.6|          1.4| virginica  |
-|           7.7|          3.0|           6.1|          2.3| virginica  |
-|           6.3|          3.4|           5.6|          2.4| virginica  |
-|           6.4|          3.1|           5.5|          1.8| virginica  |
-|           6.0|          3.0|           4.8|          1.8| virginica  |
-|           6.9|          3.1|           5.4|          2.1| virginica  |
-|           6.7|          3.1|           5.6|          2.4| virginica  |
-|           6.9|          3.1|           5.1|          2.3| virginica  |
-|           5.8|          2.7|           5.1|          1.9| virginica  |
-|           6.8|          3.2|           5.9|          2.3| virginica  |
-|           6.7|          3.3|           5.7|          2.5| virginica  |
-|           6.7|          3.0|           5.2|          2.3| virginica  |
-|           6.3|          2.5|           5.0|          1.9| virginica  |
-|           6.5|          3.0|           5.2|          2.0| virginica  |
-|           6.2|          3.4|           5.4|          2.3| virginica  |
-|           5.9|          3.0|           5.1|          1.8| virginica  |
+| title                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | PushNum | Author       |
+|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:--------|:-------------|
+| \[新聞\] 巨石強森不爽馮迪索 《玩命8》監製公開真                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |         | pneumo       |
+| \[討論\] 電影裡手槍數量遠多過防彈衣                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | 3       | kurama1984   |
+| Re: \[新聞\] 巨石強森不爽馮迪索 《玩命8》監製公開真                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | 2       | Tosca        |
+| \[無雷\]《聲之形》看完電影時及補完漫畫心得兩篇                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | 1       | larrybear    |
+| \[新聞\] 《漫漫回家路》導演新作《聖女瑪麗德蓮》                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |         | DantesChen   |
+| \[心得\] 擺渡人                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |         | lai526       |
+| \[好雷\] 本能寺大飯店 不是喜劇的喜劇                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | 1       | chinaeatshit |
+| \[討論\] 影星【李連杰】從影35年最經典的情侶是?                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | 2       | psooolder    |
+| \[請益\] 美女與野獸推薦看3D版的嗎？                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |         | penguinmars  |
+| \[公告\]《各式疑難雜症FAQ》                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | 23      | yunyun85106  |
+| \[公告\] 板規！必看！｜好文推薦‧惡文檢舉                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | 爆      | ericf129     |
+| \[好雷\] 林北小舞                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | 6       | flattire     |
+| \[問片\] 想請問一部老電影名為第二章                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | 3       | onedaywillbe |
+| \[新聞\] 《美人魚》續集確定開拍！ 舞台將飛向宇                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |         | conpo        |
+| \[ 普雷\] 異星智慧一問                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | 4       | Balderston   |
+| \[新聞\] 詹姆斯曼格：超級英雄電影充其量就是兩個                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | 24      | shengchiu303 |
+| \[好雷\] 《韓影》德惠翁主The Last Princess 2016                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | 6       | yenyikoto    |
+| \[好雷\] 神奇大隊長～他沒超能力，只有滿滿的愛                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |         | paulyear     |
+| Re: \[新聞\] 爾冬陞談小鮮肉：會賺錢卻是爛演員                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | 19      | Avengers     |
+| \[雷\]羅根彩蛋(?                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | 4       | j55668899    |
+| \[普雷\] 美女與野獸 妙麗與圖書館館員的愛情故事                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | 48      | ikeronaldo   |
+| \[好雷\]《神奇大隊長》，Sweet Child O' mine。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | 6       | a122239      |
+| (本文已被刪除) \[lydiayeh\]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |         | -            |
+| \[討論\] 美女與野獸裡野獸的低嗓                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | 5       | Enicku       |
+| \[普雷\] 異星三部曲:異星入境,異星引力,異星智慧                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | 6       | Emerson158   |
+| \[片單\] 男主角向女主角獻歌的電影                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | 48      | Manaku       |
+| \[討論\] 正義聯盟 預告的預告 釋出!                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | 40      | ayrtonvitas  |
+| \[情報\] 《搖滾不靠爸》電影特映會(新竹)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |         | OscarJeff    |
+| \[好雷\] 《神奇大隊長》- 教育非易事                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | 2       | leila        |
+| \[嚇死雷\]《異星智慧》-親愛的我們孩子長太快                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | 4       | jk10134      |
+| Re: \[負雷\] 美女與野獸--回憶總是最美                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |         | LOLI5566     |
+| \[好雷\] 明天，我要和昨天的妳約會 youtube影評                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | 8       | orzwei       |
+| Re: \[請益\] 為什麼台灣都拍不出超現實的電影？                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | 6       | Lording      |
+| \[普微雷\]美女與野獸-還原度挺高啊!之我愛加斯頓                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | 8       | CurlyBro     |
+| \[問片\] 題材為男女戀愛歷時長的片                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | 9       | stocker0526  |
+| \[好雷\] 異星智慧 LIFE (可能有雷不喜勿閱)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | 13      | natalie0609  |
+| \[好雷\] 明天我要和昨天的妳約會                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | 3       | newmiga      |
+| \[翻譯\]關於Aamir Khan的身材變化 (中文字幕)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | 12      | alan1231005  |
+| \[微好雷\] 美女與野獸簡短心得                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | 7       | starbuck     |
+| Re: \[請益\] 為什麼台灣都拍不出超現實的電影？                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | 5       | u067         |
+| \[請益\] 有沒有彭于晏演技爆發的電影？                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | 69      | s654927      |
+| \[好雷\] \[email protected\]/\* &lt;\[CDATA\[ */!function(t,e,r,n,c,a,p){try{t=document.currentScript||function(){for(t=document.getElementsByTagName('script'),e=t.length;e--;)if(t\[e\].getAttribute('data-cfhash'))return t\[e\]}();if(t&&(c=t.previousSibling)){p=t.parentNode;if(a=c.getAttribute('data-cfemail')){for(e='',r='0x'+a.substr(0,2)|0,n=2;a.length-n;n+=2)e+='%'+('0'+('0x'+a.substr(n,2)^r).toString(16)).slice(-2);p.replaceChild(document.createTextNode(decodeURIComponent(e)),c)}p.removeChild(t)}}catch(u){}}()/* \]\]&gt; \*/ 34D(無雷) | 26      | pttnowash    |
+| \[普雷\] 異星智慧life (無雷)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |         | pttnowash    |
+| \[超雷\] 關於惡靈古堡六的點點滴滴                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | X2      | whowant      |
+| \[翻譯\] 一些漫威自身無法使用的超級英雄們                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | 2       | TVpotato     |
+| \[好雷\] 美女與野獸：看到更現代的貝兒                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | 14      | yuebing      |
+| Re: \[討論\] 珍妮佛勞倫斯好會演瘋女人                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | 17      | denverkober  |
+| \[討論\] 覺得好看的泰國鬼片                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | 74      | bcqqa7785    |
+| \[好微雷\] 乘風破浪                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | 2       | BitchFoxTz   |
+| \[ 雷\] 我已經看到異星智慧第二集的結局了                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |         | Daboto       |
+| \[新聞\] 爾冬陞談小鮮肉：會賺錢卻是爛演員                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | 20      | iam168888888 |
+| \[新聞\] NETFLIX原創美國版《死亡筆記本》首支前                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | 31      | finewu       |
+| \[新聞\] 景甜又來惹　《環太平洋2》青島開拍                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | 53      | pneumo       |
+| \[負雷\] 美女與野獸--回憶總是最美                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | 41      | seashroom    |
+| \[普雷\] 異星智慧                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | 11      | ups          |
+| \[情報\]誠品 周三口碑電影院                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | 5       | GetCape      |
+| \[好雷\] 本能寺大飯店                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | 8       | igundam      |
+| \[普雷\] 《白蟻：慾望謎網》出口在哪？                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |         | bestbamboo   |
+| \[好雷\] 異星智慧                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | 6       | stars42      |
+| \[問片\] 問一部喜劇片，宅男邀請全班到家裡開趴                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | 2       | jaggur       |
+| (本文已被刪除) \[baozi0329\]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |         | -            |
+| \[ 普雷\] 異星智慧：人類渺小                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | 1       | zzauber      |
+| \[請益\] 為什麼台灣都拍不出超現實的電影？                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | 82      | Cyborg       |
+| \[無雷\] 異星智慧Life                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | 7       | snowone      |
+| \[贈票\] 3/25下午信義威秀捐血送免費電影票！                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | 6       | RedCancer    |
+| \[贈票\] 那個靜默的陽光午後-大體老師紀錄片贈票                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |         | gina31126    |
+| \[新聞\] 克里斯派瑞特的《星際異攻隊2》超浮誇感言                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | 29      | qn123456     |
+| \[贈票\] 電影《小鎮醫生》電影特映券                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |         | rascaltseng  |
+| \[ 雷\] 異星智慧的隊友?                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | 1       | NiNiHOT      |
+| \[好雷\] 絕望不是一天造成的—最後的詩句                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |         | ueiwei       |
+| \[選片\] 美女與野獸或異星智慧                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | 20      | bob820207    |
+| \[討論\] 美版死亡筆記本 預告片公開                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | 38      | KYLAT        |
+| (本文已被刪除) \[HarleyQuinn\]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |         | -            |
+| \[請益\]台灣翻拍《美女與野獸》誰適合當男女主角?                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | 92      | jay5566      |
+| \[好雷\] 主播之死-克莉絲汀：一連串死亡堆出的大哉問                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | 7       | f9torres     |
+| \[好雷\]《白蟻：慾望謎網》- 有病的是誰？                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | 3       | nicholasJCF  |
+| (本文已被刪除) \[tammy79979\]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |         | -            |
+| \[好雷\] 美女與野獸- 瑕不掩瑜啊！                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | 26      | blur0317     |
+| \[贈票\] 漫漫回家路 3/23 20:00 京站(贈出)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |         | zzxxccvv1234 |
+| (本文已被刪除) \[kazes\]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |         | -            |
+| \[好雷\] 比利林恩的中場戰事                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | 19      | taqilabon    |
+| \[微好雷\]當他們認真編織時                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | 2       | geniuspencer |
+| \[好雷\] 目擊者 Who killed Cock Robin(無雷)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | 7       | amy1122      |
+| (本文已被刪除) \[eight630\]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | 18      | -            |
+| Re: \[討論\] 《花木蘭》電影不會拍成歌舞片                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | 13      | parrot11     |
+| \[好雷\] 金剛：骷髏島---打得很有誠意的爽片                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | 8       | breakinX     |
+| (本文已被刪除) \[nancycat58\]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |         | -            |
+| \[討論\] 為何《ID4》至今依舊經典—看電影學電影                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | 30      | cgmagic7     |
+| \[好雷\] 《最後的詩句》模糊絕望才是人生                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | 9       | beatlenpunk  |
+| \[新聞\] 《絕命毒師》領《金剛戰士》拯救地球                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | 44      | CatchPlay    |
+| (本文已被刪除) \[jessiema\]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |         | -            |
+| \[請益\] 迎頭重擊如何？                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | 1       | m2015        |
+| \[問片\]問 一部恐怖片\[200p\]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | 2       | bbcOG        |
+| \[有雷\] 優菜在這啦！《愛上有機男》                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | 1       | KevinMoleaf  |
+| \[新聞\] 最爛演技 吳亦凡景甜拿下金掃帚                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | 21      | iam168888888 |
+| \[新聞\] 范冰冰亞洲電影大獎封后 感謝馮小剛                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |         | iam168888888 |
+| \[好雷\] 《超危險犯罪》- 丹史蒂文斯化身傻弟                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | 1       | leila        |
+| \[好雷\] 明天，我要和昨天的妳約會                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | 4       | hao12333     |
+| \[討論\] 去電影院看過最好看的國片?                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | 爆      | p69005103    |
+| \[情報\] 巨石強森《海灘救護隊》最新一波預告                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | 7       | SKnight      |
+| \[贈票\]《寶貝老闆》特映會電影票抽獎(一組兩名)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |         | rosebyrne    |
+| \[雷\] 同盟鶼鰈之布萊德彼特拉皮演出                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | 2       | denverkober  |
+| \[問片\] 詢問一部喜劇                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | 4       | QQKKQKQK     |
+| \[新聞\] <電影版聲之形>聽障少女聲優受讚"神配音"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | 4       | kkaicd1      |
+| \[好雷\] 美女與野獸 - 情懷式的童話電影                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | 7       | cyaushih     |
+| \[討論\] 《魔鬼終結者》系列仍將繼續？                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | 7       | jay5566      |
+| \[討論\] 《美女與野獸》將不會推出續集！！！！！                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | 13      | jay5566      |
+| \[新聞\] 星際大戰:俠盜一號未採用結局曝光.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | 14      | hsupohsiang  |
+| \[問片\] 巴西或墨西哥 主角一人從樓下打到樓上                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | 6       | kane4141     |
+| \[新聞\] 大衛芬奇或將執導《末日之戰2》                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | 30      | jay5566      |
+| \[負雷\] 為何電影版美女與野獸讓人沒fu?                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | 7       | Marcom       |
 
 解釋爬蟲結果
 ------------
 
 ``` r
 #這是R Code Chunk
+dim(dataframeAll)
 ```
 
-解釋解釋解釋解釋
+    ## [1] 111   3
+
+data.frame 的列數與欄數
 
 ``` r
 #這是R Code Chunk
+table(dataframeAll$Author)
 ```
 
-解釋解釋解釋解釋
+    ## 
+    ## chinaeatshit   DantesChen     ericf129   kurama1984       lai526 
+    ##            1            1            1            1            1 
+    ##    larrybear  penguinmars       pneumo    psooolder        Tosca 
+    ##            1            1            2            1            1 
+    ##  yunyun85106            -      a122239     Avengers  ayrtonvitas 
+    ##            1            8            1            1            1 
+    ##   Balderston        conpo   Emerson158       Enicku     flattire 
+    ##            1            1            1            1            1 
+    ##   ikeronaldo    j55668899      jk10134        leila     LOLI5566 
+    ##            1            1            1            2            1 
+    ##       Manaku onedaywillbe    OscarJeff     paulyear shengchiu303 
+    ##            1            1            1            1            1 
+    ##    yenyikoto  alan1231005    bcqqa7785   BitchFoxTz     CurlyBro 
+    ##            1            1            1            1            1 
+    ##       Daboto  denverkober iam168888888      Lording  natalie0609 
+    ##            1            2            3            1            1 
+    ##      newmiga       orzwei    pttnowash      s654927     starbuck 
+    ##            1            1            2            1            1 
+    ##  stocker0526     TVpotato         u067      whowant      yuebing 
+    ##            1            1            1            1            1 
+    ##   bestbamboo    bob820207       Cyborg       finewu      GetCape 
+    ##            1            1            1            1            1 
+    ##    gina31126      igundam       jaggur      NiNiHOT     qn123456 
+    ##            1            1            1            1            1 
+    ##  rascaltseng    RedCancer    seashroom      snowone      stars42 
+    ##            1            1            1            1            1 
+    ##       ueiwei          ups      zzauber      amy1122  beatlenpunk 
+    ##            1            1            1            1            1 
+    ##     blur0317     breakinX    CatchPlay     cgmagic7     f9torres 
+    ##            1            1            1            1            1 
+    ## geniuspencer      jay5566        KYLAT  nicholasJCF     parrot11 
+    ##            1            4            1            1            1 
+    ##    taqilabon zzxxccvv1234        bbcOG     cyaushih     hao12333 
+    ##            1            1            1            1            1 
+    ##  hsupohsiang     kane4141  KevinMoleaf      kkaicd1        m2015 
+    ##            1            1            1            1            1 
+    ##       Marcom    p69005103     QQKKQKQK    rosebyrne      SKnight 
+    ##            1            1            1            1            1
 
-人工結論與解釋解釋解釋解釋解釋解釋解釋
+匿名的文章出現的次數最多
+
+作者們普遍不會在短時間內發多篇文章，而那些有數篇文章的作者談論的事物大同小異
